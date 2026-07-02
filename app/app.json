@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "KidGuard",
+    "slug": "kidguard",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "kidguard",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0B3D2E"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kidguard.app",
+      "infoPlist": {
+        "UIBackgroundModes": ["location", "fetch", "audio"],
+        "NSLocationWhenInUseUsageDescription": "Dùng vị trí để đính kèm nơi đỗ xe khi gửi cảnh báo cho người thân.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Dùng vị trí nền để phát hiện kết thúc chuyến đi và cảnh báo bỏ quên trẻ.",
+        "NSMotionUsageDescription": "Dùng cảm biến chuyển động để phát hiện khi xe dừng (kết thúc chuyến)."
+      }
+    },
+    "android": {
+      "package": "com.kidguard.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "ACTIVITY_RECOGNITION",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_SCAN",
+        "SEND_SMS",
+        "VIBRATE",
+        "FOREGROUND_SERVICE"
+      ]
+    },
+    "plugins": [
+      "expo-location",
+      "expo-notifications"
+    ]
+  }
+}

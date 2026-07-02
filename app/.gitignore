@@ -1,0 +1,9 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+# Khoá backend, không commit
+.env
+.env.local
