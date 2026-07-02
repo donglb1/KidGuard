@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { StoreProvider, useStore } from '@/state/store';
+import { configureNotifications } from '@/services/notifier';
 import { colors } from '@/theme';
 import OnboardingScreen from '@/screens/OnboardingScreen';
 import HomeScreen from '@/screens/HomeScreen';
@@ -92,6 +93,12 @@ function Main() {
 }
 
 export default function App() {
+  // Cấu hình handler thông báo + chế độ âm thanh mỗi lần khởi động (không chỉ khi onboarding),
+  // để người dùng đã onboard vẫn nhận báo động và phát chuông đúng cách.
+  useEffect(() => {
+    configureNotifications();
+  }, []);
+
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />

@@ -137,9 +137,12 @@ export class AlertEngine {
 
     if (contact.notifyBySms) {
       await this.safe(() => this.hooks.sms(contact, this.lastLocation));
+      // Nếu người dùng đã xác nhận (đưa bé ra) trong lúc gửi SMS → dừng ngay, không gọi tiếp.
+      if (this.state !== 'calling_contacts') return;
     }
     if (contact.notifyByCall) {
       await this.safe(() => this.hooks.call(contact, this.lastLocation));
+      if (this.state !== 'calling_contacts') return;
     }
 
     // Chờ T3 giây rồi chuyển người kế tiếp nếu vẫn chưa được xác nhận.

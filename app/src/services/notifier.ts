@@ -1,24 +1,27 @@
 import { Vibration, Platform } from 'react-native';
 import { Audio } from 'expo-av';
 import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 
 /**
  * notifier — chuông báo động, rung, và thông báo đẩy.
- * Chuông dùng expo-av phát lặp. Vì prototype không kèm file âm thanh nhị phân,
- * ta phát âm từ URL công khai; thay bằng asset cục bộ khi đóng gói thật.
+ * Chuông dùng expo-av phát lặp từ asset cục bộ (chạy được cả khi mất mạng).
  */
 
 // Mẫu rung: kêu 0.8s, nghỉ 0.4s, lặp lại.
 const VIBRATION_PATTERN = [0, 800, 400];
 
-// Nguồn âm báo động tạm cho prototype (thay bằng require('../../assets/alarm.mp3') khi có asset).
-const ALARM_URI =
-  'https://actions.google.com/sounds/v1/alarms/beep_short.ogg';
+// Âm báo động cục bộ (bundle trong app) — beep + khoảng lặng, lặp thành chuỗi beep.
+const ALARM_ASSET = require('../../assets/alarm.wav');
 
 let sound: Audio.Sound | null = null;
 let playing = false;
 
-export async function setupNotifications(): Promise<void> {
+/**
+ * Cấu hình handler thông báo + chế độ âm thanh. KHÔNG xin quyền (không hiện hộp thoại),
+ * nên an toàn để gọi mỗi lần khởi động app (kể cả người dùng đã onboard).
+ */
+export async function configureNotifications(): Promise<void> {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
@@ -27,13 +30,22 @@ export async function setupNotifications(): Promise<void> {
     }),
   });
   try {
-    await Notifications.requestPermissionsAsync();
     await Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,
       staysActiveInBackground: false,
     });
   } catch (e) {
-    console.warn('[notifier] setup lỗi:', e);
+    console.warn('[notifier] cấu hình âm thanh lỗi:', e);
+  }
+}
+
+/** Cấu hình + xin quyền thông báo (dùng trong onboarding, có thể hiện hộp thoại). */
+export async function setupNotifications(): Promise<void> {
+  await configureNotifications();
+  try {
+    await Notifications.requestPermissionsAsync();
+  } catch (e) {
+    console.warn('[notifier] xin quyền thông báo lỗi:', e);
   }
 }
 
@@ -44,7 +56,7 @@ export async function startAlarm(withSound: boolean): Promise<void> {
   if (!withSound) return;
   try {
     const { sound: s } = await Audio.Sound.createAsync(
-      { uri: ALARM_URI },
+      ALARM_ASSET,
       { shouldPlay: true, isLooping: true, volume: 1.0 },
     );
     sound = s;
@@ -75,7 +87,16 @@ export async function getExpoPushToken(): Promise<string | undefined> {
       const req = await Notifications.requestPermissionsAsync();
       if (req.status !== 'granted') return undefined;
     }
-    const token = await Notifications.getExpoPushTokenAsync();
+    // Expo SDK 49+ yêu cầu projectId (từ EAS) khi lấy push token.
+    // Điền `extra.eas.projectId` trong app.json sau khi chạy `eas init`.
+    const projectId =
+      Constants.expoConfig?.extra?.eas?.projectId ??
+      (Constants as any).easConfig?.projectId;
+    if (!projectId) {
+      console.warn('[notifier] chưa cấu hình EAS projectId → bỏ qua push token đa thiết bị.');
+      return undefined;
+    }
+    const token = await Notifications.getExpoPushTokenAsync({ projectId });
     return token.data;
   } catch (e) {
     console.warn('[notifier] getExpoPushToken lỗi:', e);

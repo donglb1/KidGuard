@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "module": "commonjs",
+    "target": "es2019",
+    "moduleResolution": "node",
+    "outDir": "./build",
+    "rootDir": "../src",
+    "skipLibCheck": true,
+    "jsx": "react-native"
+  },
+  "include": [
+    "../src/services/alertEngine.ts",
+    "../src/services/habitModel.ts",
+    "../src/services/presenceModel.ts",
+    "../src/services/rearSeatReminder.ts",
+    "../src/services/geofence.ts",
+    "../src/models/index.ts"
+  ]
+}
